@@ -27,8 +27,9 @@ $(document).ready(function() {
         e.preventDefault();
         e.stopPropagation();
 
-        const main_network = $('#main_network').val();
-        const prefix = main_network.split('/')[1];
+        const network = $('#main_network').val().split('/');
+        const main_network = network[0];
+        const prefix =  Number(network[1]);
         const lans = [];
 
         $('#table-body-lans tr[data-lan]').each(function() {
@@ -37,7 +38,7 @@ $(document).ready(function() {
 
             lans.push({
                 name,
-                devices
+                devices: Number(devices)
             });
         });
 
@@ -47,6 +48,19 @@ $(document).ready(function() {
             lans
         };
 
-        console.log(data);
+        let result = $.ajax({
+            type: 'POST',
+            url: '/calculate',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            async: false
+        }).responseJSON;
+
+        if(!result.success) {
+            alert(result.error);
+            return;
+        }
+
+        window.location.href = '/results';
     });
 });
