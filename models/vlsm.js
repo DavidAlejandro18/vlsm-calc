@@ -51,6 +51,7 @@ class VLSM {
                 subnetMask,
                 subnetMaskPrefix,
                 hostsAvailable,
+                hostrequired: lan.devices,
                 firstHost,
                 lastHost
             });

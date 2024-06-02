@@ -11,9 +11,12 @@ router.get('/', (req, res) => {
 router.post('/calculate', calculate);
 
 router.get('/results', (req, res) => {
-    let result = req.session.result;
+    let data = req.session.result;
     
-    res.json(result);
+    res.render('results', {
+        title: 'Calculadora VLSM | Resultados',
+        data
+    });
 });
 
 module.exports = router;

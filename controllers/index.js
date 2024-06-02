@@ -4,16 +4,22 @@ const calculate = (req, res) => {
     try {
         let { main_network, lans, prefix } = req.body;
         let vlsm = new VLSM(main_network, lans, prefix);
-        let result = vlsm.init();
+        let vlsm_result = vlsm.init();
+        let subnetMask = vlsm.prefixToSubnetMask(prefix);
 
-        req.session.result = result;
+        req.session.result = {
+            vlsm_result,
+            main_network,
+            prefix,
+            subnetMask
+        };
 
         return res.json({
             success: true
         });
     } catch (error) {
         return res.status(500).json({
-            success: true,
+            success: false,
             error
         });
     }
