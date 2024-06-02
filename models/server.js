@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const hbs = require('hbs');
 
 class Server {
     constructor() {
@@ -8,6 +9,8 @@ class Server {
 
         this.middlewares();
 
+        this.hbs();
+
         this.routes();
     }
 
@@ -15,6 +18,33 @@ class Server {
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.static('public'));
+        this.app.use(express.urlencoded({ extended: true }));
+    }
+
+    hbs() {
+        this.app.set('view engine', 'hbs');
+        // hbs.registerPartials(__dirname + '/../views/partials');
+
+        hbs.registerHelper({
+            ifEquals: function(arg1, arg2, options) {
+                return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+            },
+            json: function(value) {
+                return JSON.stringify(value);
+            },
+            times: function(n, block) {
+                var accum = '';
+                for (var i = 0; i < n; ++i)
+                    accum += block.fn(i);
+                return accum;
+            },
+            and: function(a, b) {
+                return a && b;
+            },
+            or: function(a, b) {
+                return a || b;
+            },
+        });
     }
 
     routes() {
