@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,27 +9,32 @@
     <link rel="stylesheet" href="/css/styles.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <div class="container vh-100 vh-100 d-flex flex-column align-items-center justify-content-center">
         <h1>Calculadora VLSM</h1>
         <h4>Resultados</h4>
 
-        <table class="table table-sm table-bordered w-75">
+        <table class="table table-sm table-bordered table-hover w-75">
             <thead>
                 <tr>
-                    <th colspan="2">Dirección de red:</th>
+                    <th colspan="2" class="text-end">Dirección de red:</th>
                     <td>{{ data.main_network }}</td>
-                    <th>Prefix:</th>
+                    <th class="text-end">Prefijo:</th>
                     <td>/{{ data.prefix }}</td>
-                    <th>Mascara:</th>
+                    <th class="text-end">Mascara:</th>
                     <td colspan="2">{{ data.subnetMask }}</td>
                 </tr>
                 <tr class="text-center">
                     <th>Nombre de la subred</th>
-                    <th>No. de dispositivos</th>
-                    <th>No. de dispositivos permitidos</th>
-                    <th>Dirección de red</th>
+                    <th>No. de hosts</th>
+                    <th>No. de hosts permitidos</th>
+                    <th>Dirección de subred</th>
                     <th>Máscara de subred</th>
                     <th>Primera dirección</th>
                     <th>Última dirección</th>
@@ -42,7 +47,7 @@
                         <td>{{ lan }}</td>
                         <td>{{ hostrequired }}</td>
                         <td>{{ hostsAvailable }}</td>
-                        <td>{{ network }}</td>
+                        <td>{{ network }}/{{ subnetMaskPrefix }}</td>
                         <td>{{ subnetMask }}</td>
                         <td>{{ firstHost }}</td>
                         <td>{{ lastHost }}</td>
@@ -51,8 +56,81 @@
                 {{/each}}
             </tbody>
         </table>
+
+        <button class="btn btn-lg" type="button" data-bs-toggle="collapse" data-bs-target="#more-info" aria-expanded="false" aria-controls="more-info">
+            <i class="bi bi-arrow-down-circle-fill"></i>
+        </button>
+        
+        <div class="collapse mt-2 w-75" id="more-info">
+            <h4 class="text-center">Cálculo de VLSM para Subredes</h4>
+            <hr>
+            <section>
+                <p>El cálculo de VLSM (Variable Length Subnet Masking) permite dividir una red principal en subredes de diferentes tamaños, ajustadas a las necesidades específicas de cada segmento. A continuación, se detalla el proceso paso a paso para realizar este cálculo.</p>
+            </section>
+
+            <section>
+                <h5>Paso 1: Determinar la Red Principal y el Prefijo</h5>
+                <p>La red principal se define por una dirección IP y un prefijo que determina la cantidad de bits usados para la red. Si el prefijo no se especifica, se determina según la clase de la dirección IP:</p>
+
+                <ul>
+                    <li>Clase A (1-126): Prefijo 8</li>
+                    <li>Clase B (128-191): Prefijo 16</li>
+                    <li>Clase C (192-223): Prefijo 24</li>
+                </ul>
+            </section>
+
+            <section>
+                <h5>Paso 2: Ordenar las Subredes por Tamaño</h5>
+                <p>Las subredes (LANs) se ordenan de mayor a menor según la cantidad de dispositivos que necesitan soportar. Esto garantiza que las subredes más grandes reciban los bloques de direcciones más grandes disponibles.</p>
+            </section>
+
+            <section>
+                <h5>Paso 3: Calcular los Bits Necesarios para Cada Subred</h5>
+                <p>Para cada subred, se calcula el número de bits necesarios para los hosts:</p>
+                <p class="text-center">\(\mathrm{bits\_requeridos} = [ \log_2(\mathrm{hosts\_requeridos} + 2) ]\)</p>
+            </section>
+
+            <section>
+                <h5>Paso 4: Determinar la Máscara de Subred</h5>
+                <p>Con los bits necesarios, se calcula el nuevo prefijo de la subred:</p>
+                <p class="text-center">\(\mathrm{prefijo\_subred} = 32 - \mathrm{bits\_requeridos}\)</p>
+                <p>La máscara de subred en formato decimal se obtiene convirtiendo a decimal una cadena binaria con los bits de red en 1 y los bits de hosts en 0.</p>
+            </section>
+
+            <section>
+                <h5>Paso 5: Calcular las Direcciones de Red y Broadcast</h5>
+                <p>Para cada subred, se determina:</p>
+                <ul>
+                    <li>Dirección de red: los bits de host son todos 0.</li>
+                    <li>Dirección de broadcast: los bits de host son todos 1.</li>
+                </ul>
+                <p>La dirección de red se convierte en la primera dirección de host añadiendo 1 y la dirección de broadcast se convierte en la última dirección de host restando 1.</p>
+            </section>
+
+            <section>
+                <h5>Paso 6: Asignar la Siguiente Subred</h5>
+                <p>La siguiente subred comienza inmediatamente después de la dirección de broadcast de la subred actual.</p>
+            </section>
+            <br>
+        </div>
     </div>
 
+    <script>
+        $(document).ready(function() {
+            const collapseButton = $('[data-bs-toggle="collapse"]');
+            const icon = collapseButton.find('i');
+
+            collapseButton.on('click', function() {
+                if (collapseButton.attr('aria-expanded') === 'true') {
+                    icon.removeClass('bi-arrow-down-circle-fill');
+                    icon.addClass('bi-arrow-up-circle-fill');
+                } else {
+                    icon.removeClass('bi-arrow-up-circle-fill');
+                    icon.addClass('bi-arrow-down-circle-fill');
+                }
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
