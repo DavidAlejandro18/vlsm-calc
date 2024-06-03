@@ -5,6 +5,7 @@ const calculate = (req, res) => {
         let { main_network, lans, prefix } = req.body;
         let vlsm = new VLSM(main_network, lans, prefix);
         let vlsm_result = vlsm.init();
+        prefix = vlsm.prefix;
         let subnetMask = vlsm.prefixToSubnetMask(prefix);
 
         req.session.result = {

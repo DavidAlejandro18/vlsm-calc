@@ -15,6 +15,30 @@ function generateTableBodyLANs() {
     }
 }
 
+function validateIpCidr(ipCidr) {
+    const pattern = /^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\/(\d{1,2})$/;
+
+    const match = ipCidr.match(pattern);
+    if (!match) {
+        return false;
+    }
+
+    const [_, ip, mask] = match;
+
+    if (!(0 <= parseInt(mask) && parseInt(mask) <= 32)) {
+        return false;
+    }
+
+    const octets = ip.split('.');
+    for (let octet of octets) {
+        if (!(0 <= parseInt(octet) && parseInt(octet) <= 255)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 $(document).ready(function() {
     generateTableBodyLANs();
 
@@ -27,9 +51,16 @@ $(document).ready(function() {
         e.preventDefault();
         e.stopPropagation();
 
+        if (!validateIpCidr($('#main_network').val())) {
+            $('#main_network').removeClass('is-valid').addClass('is-invalid');
+            return;
+        }
+        
+        $('#main_network').removeClass('is-invalid').addClass('is-valid');
+
         const network = $('#main_network').val().split('/');
         const main_network = network[0];
-        const prefix =  Number(network[1]);
+        const prefix = Number(network[1]) || 0;
         const lans = [];
 
         $('#table-body-lans tr[data-lan]').each(function() {
