@@ -4,7 +4,8 @@ const { calculate } = require('../controllers/index');
 
 router.get('/', (req, res) => {
     res.render('index', {
-        title: 'Calculadora VLSM'
+        title: 'Calculadora VLSM',
+        page: 'index'
     });
 });
 
@@ -15,6 +16,7 @@ router.get('/results', (req, res) => {
     
     res.render('results', {
         title: 'Calculadora VLSM | Resultados',
+        page: 'results',
         data
     });
 });

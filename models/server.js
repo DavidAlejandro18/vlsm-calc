@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const hbs = require('hbs');
+const path = require('path');
 const session = require('express-session');
 
 class Server {
@@ -30,7 +31,7 @@ class Server {
 
     hbs() {
         this.app.set('view engine', 'hbs');
-        // hbs.registerPartials(__dirname + '/../views/partials');
+        hbs.registerPartials(path.join(__dirname, "../", "/views/partials"));
 
         hbs.registerHelper({
             ifEquals: function(arg1, arg2, options) {
