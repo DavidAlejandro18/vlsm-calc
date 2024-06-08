@@ -1,5 +1,22 @@
 const VLSM = require('../models/vlsm');
 
+const indexPage = (req, res) => {
+    res.render('index', {
+        title: 'Calculadora VLSM',
+        page: 'index'
+    });
+};
+
+const resultsPage = (req, res) => {
+    let data = req.session.result;
+
+    res.render('results', {
+        title: 'Calculadora VLSM | Resultados',
+        page: 'results',
+        data
+    });
+};
+
 const calculate = (req, res) => {
     try {
         let { main_network, lans, prefix } = req.body;
@@ -27,5 +44,7 @@ const calculate = (req, res) => {
 }
 
 module.exports = {
+    indexPage,
+    resultsPage,
     calculate
 };
