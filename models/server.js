@@ -18,7 +18,26 @@ class Server {
     }
 
     middlewares() {
-        this.app.use(cors());
+        const allowedOrigins = [`http://localhost:${this.port}`];
+
+        if (process.env.URL_SERVER) {
+            allowedOrigins.push(process.env.URL_SERVER);
+        }
+
+        const corsOptions = {
+            origin: function(origin, callback) {
+                if (!origin) return callback(null, true);
+                
+                if (allowedOrigins.indexOf(origin) === -1) {
+                    var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+                    return callback(new Error(msg), false);
+                }
+
+                return callback(null, true);
+            }
+        };
+
+        this.app.use(cors(corsOptions));
         this.app.use(express.json());
         this.app.use(express.static('public'));
         this.app.use(express.urlencoded({ extended: true }));

@@ -18,6 +18,7 @@ Por ultimo, crear un archivo `.env` en la raíz del proyecto y agregar las sigui
 ```env
 PORT=3000
 SECRET_SESSION=ingresa_tu_clave_secreta
+URL_SERVER=https://vlsm-calc.onrender.com (opcional)
 ```
 
 ## Uso
