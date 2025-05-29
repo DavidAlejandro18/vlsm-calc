@@ -7,33 +7,26 @@ const indexPage = (req, res) => {
     });
 };
 
-const resultsPage = (req, res) => {
-    let data = req.session.result;
-
-    res.render('results', {
-        title: 'Calculadora VLSM | Resultados',
-        page: 'results',
-        data
-    });
-};
-
 const calculate = (req, res) => {
     try {
-        let { main_network, lans, prefix } = req.body;
+        let { data_subnets } = req.body;
+        data_subnets = JSON.parse(data_subnets);
+
+        let { main_network, prefix, lans } = data_subnets;
         let vlsm = new VLSM(main_network, lans, prefix);
         let vlsm_result = vlsm.init();
         prefix = vlsm.prefix;
         let subnetMask = vlsm.prefixToSubnetMask(prefix);
 
-        req.session.result = {
-            vlsm_result,
-            main_network,
-            prefix,
-            subnetMask
-        };
-
-        return res.json({
-            success: true
+        return res.render('results', {
+            title: 'Calculadora VLSM | Resultados',
+            page: 'results',
+            data: {
+                vlsm_result,
+                main_network,
+                prefix,
+                subnetMask
+            }
         });
     } catch (error) {
         return res.status(500).json({
@@ -45,6 +38,5 @@ const calculate = (req, res) => {
 
 module.exports = {
     indexPage,
-    resultsPage,
     calculate
 };

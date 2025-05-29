@@ -79,19 +79,7 @@ $(document).ready(function() {
             lans
         };
 
-        let result = $.ajax({
-            type: 'POST',
-            url: '/calculate',
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            async: false
-        }).responseJSON;
-
-        if(!result.success) {
-            alert(result.error);
-            return;
-        }
-
-        window.location.href = '/results';
+        data_subnets.value = JSON.stringify(data);
+        e.target.submit();
     });
 });

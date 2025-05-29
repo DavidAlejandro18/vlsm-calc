@@ -2,13 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const hbs = require('hbs');
 const path = require('path');
-const session = require('express-session');
 
 class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT || 3000;
-        this.secret = process.env.SECRET_SESSION
 
         this.middlewares();
 
@@ -29,7 +27,7 @@ class Server {
                 if (!origin) return callback(null, true);
                 
                 if (allowedOrigins.indexOf(origin) === -1) {
-                    var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+                    let msg = 'The CORS policy for this site does not allow access from the specified Origin.';
                     return callback(new Error(msg), false);
                 }
 
@@ -41,11 +39,6 @@ class Server {
         this.app.use(express.json());
         this.app.use(express.static('public'));
         this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(session({
-            secret: this.secret,
-            resave: false,
-            saveUninitialized: true
-        }));
     }
 
     hbs() {

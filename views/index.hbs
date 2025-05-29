@@ -2,7 +2,7 @@
     <div class="container vh-100 vh-100 d-flex flex-column align-items-center justify-content-center">
         <h1>Calculadora VLSM</h1>
 
-        <form id="network-info" class="w-100 d-flex flex-column align-items-center">
+        <form id="network-info" class="w-100 d-flex flex-column align-items-center" method="post" action="/results">
             <div class="d-flex gap-3 mb-3">
                 <div class="row g-3 align-items-center">
                     <div class="col-auto">
@@ -36,6 +36,7 @@
             </table>
 
             <div class="text-center">
+                <input type="hidden" id="data_subnets" name="data_subnets" value="">
                 <button type="submit" class="btn btn-secondary" id="btn-calculate">Calcular las subredes</button>
             </div>
         </form>
