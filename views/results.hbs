@@ -3,6 +3,24 @@
         <h1>Calculadora VLSM</h1>
         <h4>Resultados</h4>
 
+        <style>
+            .copyable {
+                transition: background-color 0.2s ease;
+                cursor: pointer;
+            }
+            
+            .copyable:hover {
+                background-color: #e7f3ff !important;
+                color: #2c2e39 !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .copyable:active {
+                background-color: #cce7ff !important;
+                color: #272b30 !important;
+            }
+        </style>
+
         <table class="table table-sm table-bordered table-hover w-75">
             <thead>
                 <tr>
@@ -30,15 +48,28 @@
                         <td>{{ lan }}</td>
                         <td>{{ hostrequired }}</td>
                         <td>{{ hostsAvailable }}</td>
-                        <td>{{ network }}/{{ subnetMaskPrefix }}</td>
-                        <td>{{ subnetMask }}</td>
-                        <td>{{ firstHost }}</td>
-                        <td>{{ lastHost }}</td>
-                        <td>{{ broadcast }}</td>
+                        <td class="copyable" title="Click para copiar">{{ network }}/{{ subnetMaskPrefix }}</td>
+                        <td class="copyable" title="Click para copiar">{{ subnetMask }}</td>
+                        <td class="copyable" title="Click para copiar">{{ firstHost }}</td>
+                        <td class="copyable" title="Click para copiar">{{ lastHost }}</td>
+                        <td class="copyable" title="Click para copiar">{{ broadcast }}</td>
                     </tr>
                 {{/each}}
             </tbody>
         </table>
+
+        <!-- Notification for copy success -->
+        <div id="copy-notification" class="position-fixed top-0 end-0 p-3" style="z-index: 1050; display: none;">
+            <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-clipboard-check me-1"></i>
+                        <span id="copy-message">Copiado al portapapeles</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
 
         <button class="btn btn-lg" type="button" data-bs-toggle="collapse" data-bs-target="#more-info" aria-expanded="false" aria-controls="more-info">
             <i class="bi bi-arrow-down-circle-fill"></i>
@@ -112,6 +143,63 @@
                     icon.addClass('bi-arrow-down-circle-fill');
                 }
             });
+
+            // Copy to clipboard functionality
+            $('.copyable').on('click', function() {
+                let textToCopy = $(this).text().trim();
+                
+                // If this is a network address with prefix (contains '/'), extract only the IP
+                if (textToCopy.includes('/')) {
+                    textToCopy = textToCopy.split('/')[0];
+                }
+                
+                // Use modern clipboard API if available
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(textToCopy).then(function() {
+                        showCopyNotification(textToCopy);
+                    }).catch(function() {
+                        // Fallback to older method
+                        fallbackCopyToClipboard(textToCopy);
+                    });
+                } else {
+                    // Fallback for older browsers
+                    fallbackCopyToClipboard(textToCopy);
+                }
+            });
+
+            function fallbackCopyToClipboard(text) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showCopyNotification(text);
+                } catch (err) {
+                    console.error('Error copying to clipboard: ', err);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+
+            function showCopyNotification(copiedText) {
+                $('#copy-message').text(`Copiado: ${copiedText}`);
+                
+                const toastElement = $('#copy-notification .toast')[0];
+                const toast = new bootstrap.Toast(toastElement, {
+                    delay: 5000
+                });
+                
+                $('#copy-notification').show();
+                toast.show();
+                
+                // Hide notification container when toast is hidden
+                toastElement.addEventListener('hidden.bs.toast', function() {
+                    $('#copy-notification').hide();
+                });
+            }
         });
     </script>
 {{> bottomPage }}
