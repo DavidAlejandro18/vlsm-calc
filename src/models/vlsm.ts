@@ -1,8 +1,29 @@
+interface LAN {
+    name:string;
+    devices:number;
+}
+
+interface Subnet {
+    lan:string;
+    network:string;
+    broadcast:string;
+    subnetMask:string;
+    subnetMaskPrefix:number;
+    hostsAvailable:number;
+    hostrequired:number;
+    firstHost:string;
+    lastHost:string;
+}
+
 /**
  * Class to calculate the VLSM (Variable Length Subnet Masking) for a given network, list of LANs and prefix length
  */
 class VLSM {
-    constructor(mainNetwork, lans, prefix) {
+    constructor(
+        public mainNetwork:string, 
+        public lans:LAN[], 
+        public prefix:number
+    ) {
         this.mainNetwork = mainNetwork;
         this.lans = lans;
         this.prefix = prefix || this.determinePrefix(mainNetwork);
@@ -12,36 +33,36 @@ class VLSM {
      * Initialize the VLSM calculation
      * @returns {Array} Subnets
      */
-    init() {
+    public init():Subnet[] {
         // Order the LANs by number of devices
         this.lans.sort((a, b) => b.devices - a.devices);
 
         // Array to store the subnets
-        let subnets = [];
-        let currentNetwork = this.ipToBinary(this.mainNetwork).slice(0, this.prefix).padEnd(32, '0');
-        const ipAddressLength = 32;
+        let subnets:Subnet[] = [];
+        let currentNetwork:string = this.ipToBinary(this.mainNetwork).slice(0, this.prefix).padEnd(32, '0');
+        const ipAddressLength:number = 32;
 
         for (let lan of this.lans) {
-            let bitsRequired = this.calculateBitsRequired(lan.devices);
-            let subnetMaskPrefix = ipAddressLength - bitsRequired;
-            let subnetMask = this.prefixToSubnetMask(subnetMaskPrefix);
+            let bitsRequired:number = this.calculateBitsRequired(lan.devices);
+            let subnetMaskPrefix:number = ipAddressLength - bitsRequired;
+            let subnetMask:string = this.prefixToSubnetMask(subnetMaskPrefix);
 
             // Calculate the number of available hosts
-            let hostsAvailable = Math.pow(2, bitsRequired) - 2; // Hosts + Network and Broadcast addresses
+            let hostsAvailable:number = Math.pow(2, bitsRequired) - 2; // Hosts + Network and Broadcast addresses
 
             // Calculate the network and broadcast addresses
-            let networkAddress = currentNetwork.slice(0, subnetMaskPrefix).padEnd(32, '0');
-            let broadcastAddress = currentNetwork.slice(0, subnetMaskPrefix).padEnd(32, '1');
+            let networkAddress:string = currentNetwork.slice(0, subnetMaskPrefix).padEnd(32, '0');
+            let broadcastAddress:string = currentNetwork.slice(0, subnetMaskPrefix).padEnd(32, '1');
 
             // Calculate the first and last host addresses adding 1 to the network address and subtracting 1 from the broadcast address
-            let firstHostBinary = (parseInt(networkAddress, 2) + 1).toString(2).padStart(32, '0');
-            let lastHostBinary = (parseInt(broadcastAddress, 2) - 1).toString(2).padStart(32, '0');
+            let firstHostBinary:string = (parseInt(networkAddress, 2) + 1).toString(2).padStart(32, '0');
+            let lastHostBinary:string = (parseInt(broadcastAddress, 2) - 1).toString(2).padStart(32, '0');
 
             // Convert the addresses to decimal format
-            let network = this.binaryToIp(networkAddress);
-            let broadcast = this.binaryToIp(broadcastAddress);
-            let firstHost = this.binaryToIp(firstHostBinary);
-            let lastHost = this.binaryToIp(lastHostBinary);
+            let network:string = this.binaryToIp(networkAddress);
+            let broadcast:string = this.binaryToIp(broadcastAddress);
+            let firstHost:string = this.binaryToIp(firstHostBinary);
+            let lastHost:string = this.binaryToIp(lastHostBinary);
 
             // Add the subnet to the list
             subnets.push({
@@ -57,7 +78,7 @@ class VLSM {
             });
 
             // Calculate the next network address
-            let nextNetwork = (parseInt(broadcastAddress, 2) + 1).toString(2).padStart(32, '0'); // Add 1 to the broadcast address
+            let nextNetwork:string = (parseInt(broadcastAddress, 2) + 1).toString(2).padStart(32, '0'); // Add 1 to the broadcast address
             currentNetwork = nextNetwork;
         }
 
@@ -69,7 +90,7 @@ class VLSM {
      * @param {String} ip - IP address in decimal format
      * @returns {String} IP address in binary format
      */
-    ipToBinary(ip) {
+    private ipToBinary(ip:string):string {
         return ip.split('.').map(octet => {
             return parseInt(octet, 10) // Convert to integer
                 .toString(2) // Convert to binary
@@ -82,11 +103,11 @@ class VLSM {
      * @param {String} binary - IP address in binary format
      * @returns {String} IP address in decimal format
      */
-    binaryToIp(binary) {
-        return binary.match(/.{1,8}/g).map(byte => {
+    private binaryToIp(binary:string):string {
+        return binary.match(/.{1,8}/g)?.map(byte => {
             return parseInt(byte, 2) // Convert to integer
                 .toString(10); // Convert to decimal
-        }).join('.');
+        }).join('.') || '';
     }
 
     /**
@@ -94,7 +115,7 @@ class VLSM {
      * @param {Integer} prefix - Prefix length
      * @returns {String} Subnet mask in decimal format
      */
-    prefixToSubnetMask(prefix) {
+    public prefixToSubnetMask(prefix:number):string {
         return this.binaryToIp('1'.repeat(prefix).padEnd(32, '0')); // Convert prefix to binary and then to decimal
     }
 
@@ -103,7 +124,7 @@ class VLSM {
      * @param {Integer} hosts - Number of hosts 
      * @returns {Integer} Number of bits required for the subnet mask
      */
-    calculateBitsRequired(hosts) {
+    private calculateBitsRequired(hosts:number):number {
         return Math.ceil(Math.log2(hosts + 2));
     }
 
@@ -112,8 +133,9 @@ class VLSM {
      * @param {String} ip - IP address in decimal format
      * @returns {Integer} Default prefix length
      */
-    determinePrefix(ip) {
-        const firstOctet = parseInt(ip.split('.')[0], 10);
+    private determinePrefix(ip:string):number {
+        const firstOctet:number = parseInt(ip.split('.')[0], 10);
+
         if (firstOctet >= 1 && firstOctet <= 126) {
             return 8;  // Class A
         } else if (firstOctet >= 128 && firstOctet <= 191) {
@@ -126,4 +148,4 @@ class VLSM {
     }
 }
 
-module.exports = VLSM;
+export default VLSM;

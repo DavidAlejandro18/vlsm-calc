@@ -1,8 +1,8 @@
-const VLSM = require('../models/vlsm');
+import VLSM from '../src/models/vlsm';
 
 test("VLSM calculation", () => {
-    let main_network = '192.168.1.0';
-    let lans = [
+    let main_network: string = '192.168.1.0';
+    let lans: Array<{ name: string, devices: number }> = [
         {
             name: 'LAN 1',
             devices: 50
@@ -20,7 +20,7 @@ test("VLSM calculation", () => {
             devices: 5
         }
     ];
-    let prefix = 24;
+    let prefix: number = 24;
 
     const vlsm = new VLSM(main_network, lans, prefix);
     const vlsm_result = vlsm.init();
@@ -76,8 +76,8 @@ test("VLSM calculation", () => {
 });
 
 test("Out of order VLSM input", () => {
-    let main_network = '192.168.1.0';
-    let lans = [
+    let main_network: string = '192.168.1.0';
+    let lans: Array<{ name: string, devices: number }> = [
         {
             name: 'LAN 4',
             devices: 5
@@ -95,7 +95,7 @@ test("Out of order VLSM input", () => {
             devices: 50
         }
     ];
-    let prefix = 24;
+    let prefix: number = 24;
 
     const vlsm = new VLSM(main_network, lans, prefix);
     const vlsm_result = vlsm.init();
@@ -151,8 +151,8 @@ test("Out of order VLSM input", () => {
 });
 
 test("Small network", () => {
-    let main_network = '192.168.1.0';
-    let lans = [
+    let main_network: string = '192.168.1.0';
+    let lans: Array<{ name: string, devices: number }> = [
         {
             name: 'LAN 1',
             devices: 2
@@ -166,7 +166,7 @@ test("Small network", () => {
             devices: 9
         }
     ];
-    let prefix = 24;
+    let prefix: number = 24;
 
     const vlsm = new VLSM(main_network, lans, prefix);
     const vlsm_result = vlsm.init();
@@ -209,3 +209,4 @@ test("Small network", () => {
         ]
     );
 });
+

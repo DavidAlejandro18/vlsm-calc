@@ -1,3 +1,10 @@
 {
-    "ext": "js, css, hbs"
+    "watch": [
+        "src"
+    ],
+    "ext": "ts",
+    "ignore": [
+        "src/**/*.spec.ts"
+    ],
+    "exec": "ts-node src/app.ts"
 }
