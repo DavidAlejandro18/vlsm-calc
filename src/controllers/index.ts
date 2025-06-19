@@ -1,24 +1,26 @@
-const VLSM = require('../models/vlsm');
+import { Request, Response } from 'express';
+import VLSM from "../models/vlsm";
 
-const indexPage = (req, res) => {
+export const indexPage = (req:Request, res:Response):void => {
     res.render('index', {
         title: 'Calculadora VLSM',
         page: 'index'
     });
-};
+}
 
-const calculate = (req, res) => {
+export const calculate = (req:Request, res:Response):void => {
     try {
+        
         let { data_subnets } = req.body;
         data_subnets = JSON.parse(data_subnets);
 
         let { main_network, prefix, lans } = data_subnets;
-        let vlsm = new VLSM(main_network, lans, prefix);
+        let vlsm:VLSM = new VLSM(main_network, lans, prefix);
         let vlsm_result = vlsm.init();
         prefix = vlsm.prefix;
         let subnetMask = vlsm.prefixToSubnetMask(prefix);
 
-        return res.render('results', {
+        res.render('results', {
             title: 'Calculadora VLSM | Resultados',
             page: 'results',
             data: {
@@ -28,15 +30,11 @@ const calculate = (req, res) => {
                 subnetMask
             }
         });
+
     } catch (error) {
-        return res.status(500).json({
+        res.status(500).json({
             success: false,
             error
         });
     }
 }
-
-module.exports = {
-    indexPage,
-    calculate
-};
